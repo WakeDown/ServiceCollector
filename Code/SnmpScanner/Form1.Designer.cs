@@ -63,6 +63,8 @@
             this.label10 = new System.Windows.Forms.Label();
             this.tabDevices = new System.Windows.Forms.TabPage();
             this.tabExchange = new System.Windows.Forms.TabPage();
+            this.txtMailCopyTo = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.cmbServerTypes = new System.Windows.Forms.ComboBox();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
@@ -88,8 +90,6 @@
             this.lblExchangeNote = new System.Windows.Forms.Label();
             this.btnSmtpTest = new System.Windows.Forms.Button();
             this.chkSave2Sent = new System.Windows.Forms.CheckBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.txtMailCopyTo = new System.Windows.Forms.TextBox();
             tabImap = new System.Windows.Forms.TabPage();
             tabImap.SuspendLayout();
             this.pnlIpRanges.SuspendLayout();
@@ -349,7 +349,7 @@
             0,
             0});
             this.exchangeDelay.Minimum = new decimal(new int[] {
-            3,
+            1,
             0,
             0,
             0});
@@ -473,6 +473,22 @@
             this.tabExchange.Text = "Отправка почты";
             this.tabExchange.UseVisualStyleBackColor = true;
             this.tabExchange.Click += new System.EventHandler(this.tabExchange_Click);
+            // 
+            // txtMailCopyTo
+            // 
+            this.txtMailCopyTo.Location = new System.Drawing.Point(120, 196);
+            this.txtMailCopyTo.Name = "txtMailCopyTo";
+            this.txtMailCopyTo.Size = new System.Drawing.Size(192, 20);
+            this.txtMailCopyTo.TabIndex = 32;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(13, 199);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(79, 13);
+            this.label11.TabIndex = 31;
+            this.label11.Text = "Копия письма";
             // 
             // cmbServerTypes
             // 
@@ -720,22 +736,6 @@
             this.chkSave2Sent.Text = "сохранять в отправленных";
             this.chkSave2Sent.UseVisualStyleBackColor = true;
             this.chkSave2Sent.CheckedChanged += new System.EventHandler(this.chkSave2Sent_CheckedChanged);
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(13, 199);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(79, 13);
-            this.label11.TabIndex = 31;
-            this.label11.Text = "Копия письма";
-            // 
-            // txtMailCopyTo
-            // 
-            this.txtMailCopyTo.Location = new System.Drawing.Point(120, 196);
-            this.txtMailCopyTo.Name = "txtMailCopyTo";
-            this.txtMailCopyTo.Size = new System.Drawing.Size(192, 20);
-            this.txtMailCopyTo.TabIndex = 32;
             // 
             // Form1
             // 

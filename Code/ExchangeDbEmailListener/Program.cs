@@ -64,7 +64,7 @@ namespace ExchangeDbEmailListener
             return result;
         }
 
-        static ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
+        static ExchangeService service = new ExchangeService();
 
         /// <summary>
         /// Читаем письма в специальном ящике Exchenge Server, затем сохраняем в БД и удалеям псиьмо
@@ -76,7 +76,7 @@ namespace ExchangeDbEmailListener
             string pass = ConfigurationManager.AppSettings["pass"];
             string mail = ConfigurationManager.AppSettings["mail"];
 
-            service.Credentials = new WebCredentials(login, pass);
+            service.Credentials = new WebCredentials(mail, pass);
 
             service.UseDefaultCredentials = false;
 
@@ -90,44 +90,54 @@ namespace ExchangeDbEmailListener
             ItemView view = new ItemView(1000000000);//Чтобы ничего не пропустить берем миллиард записей сразу ))
 
             FindItemsResults<Item> findResults = service.FindItems(WellKnownFolderName.Inbox, view);
+            int totalCount = findResults.TotalCount;
 
             if (findResults.Count() > 0)
             {
-                service.LoadPropertiesForItems(findResults, PropertySet.FirstClassProperties);
-
-                foreach (Item myItem in findResults.Items)
+                int stepCount = 10;
+                int loadCount = 0;
+                while (true)
                 {
-                    //
+                    var items = findResults.Skip(loadCount).Take(stepCount);
+                        service.LoadPropertiesForItems(items, PropertySet.FirstClassProperties);
+                    //service.LoadPropertiesForItems(findResults, PropertySet.FirstClassProperties);
 
-                    try
+                    foreach (Item myItem in items)
                     {
-                        //Сохраняем письмо в БД
-                        string message = myItem.Body.Text;
-
-                        string startTag = "<DeviceRequestRoot>";
-                        string endTag = "</DeviceRequestRoot>";
-
-                        //Обрезаем лишнее
-                        if (message.Contains(startTag) && message.Contains(endTag))
+                        try
                         {
-                            message = message.Substring(message.IndexOf(startTag),
-                                message.IndexOf(endTag) + endTag.Count());
-                        }
+                            //Сохраняем письмо в БД
+                            string message = myItem.Body.Text;
 
-                        if (!message.Contains("Проверка отправки сообщения на сервер ГК ЮНИТ"))
-                        {
-                            Db.Db.Snmp.SaveExchangeItem(message);
-                        }
+                            string startTag = "<DeviceRequestRoot>";
+                            string endTag = "</DeviceRequestRoot>";
 
-                        //Удаление письма
-                        //DeleteMode.SoftDelete - The item or folder will be moved to the dumpster. Items and folders in the dumpster can be recovered.
+                            //Обрезаем лишнее
+                            if (message.Contains(startTag) && message.Contains(endTag))
+                            {
+                                message = message.Substring(message.IndexOf(startTag),
+                                    message.IndexOf(endTag) + endTag.Count());
+                            }
+
+                            if (!message.Contains("Проверка отправки сообщения на сервер ГК ЮНИТ"))
+                            {
+                                Db.Db.Snmp.SaveExchangeItem(message);
+                            }
+
+                            //Удаление письма
+                            //DeleteMode.SoftDelete - The item or folder will be moved to the dumpster. Items and folders in the dumpster can be recovered.
+
                         myItem.Delete(DeleteMode.SoftDelete);
+
+                        }
+                        catch (DbException ex)
+                        {
+                            SendErrorNote(ex.Message);
+                            continue;
+                        }
                     }
-                    catch (DbException ex)
-                    {
-                        SendErrorNote(ex.Message);
-                        continue;
-                    }
+                    loadCount += stepCount;
+                    if (loadCount> totalCount)break;
                 }
             }
 
@@ -143,6 +153,8 @@ namespace ExchangeDbEmailListener
 
         public static void SendMail(string subject, string body, MailAddress mailTo)
         {
+            string user = ConfigurationManager.AppSettings["mail"];
+            string pass = ConfigurationManager.AppSettings["pass"];
             MailAddress addressFrom = new MailAddress(ConfigurationManager.AppSettings["mailFrom"]);
             MailAddress addressTo = mailTo;
             MailMessage mail = new MailMessage(addressFrom, addressTo);
@@ -150,17 +162,14 @@ namespace ExchangeDbEmailListener
             mail.Body = body;
             mail.IsBodyHtml = false;
 
-            SmtpClient client = new SmtpClient();
-            client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["smtpPort"]);
+            SmtpClient client = new SmtpClient(user, Convert.ToInt32(ConfigurationManager.AppSettings["smtpPort"]));
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
-
+            client.Credentials = new NetworkCredential(user, pass);
+            client.EnableSsl = true;
             //if (!String.IsNullOrEmpty(settings.Login))
             //{
             //    client.Credentials = new NetworkCredential(settings.Login, settings.Password);
             //}
-
-
-            client.Host = ConfigurationManager.AppSettings["smtpServer"];
 
             client.Send(mail);
         }

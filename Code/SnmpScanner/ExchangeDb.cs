@@ -370,7 +370,7 @@ namespace SnmpScanner
                 {
                     content.Append(
                         String.Format(
-                            @"<DeviceRequest serialNum=""{5}"" date=""{0}"" host=""{1}"" oid=""{2}"" value=""{3}"" oidType=""{4}"" />",
+                            @"<DeviceRequest serialNum=""{5}"" date=""{0:dd-MM-yyyy hh:mm:ss}"" host=""{1}"" oid=""{2}"" value=""{3}"" oidType=""{4}"" />",
                             request.DateRequest, request.Host, request.Oid, request.Value.Replace("\"", ""), request.OidType, request.SerialNum.Replace("\"", "")));
                 }
                 content.Append("</DeviceRequestList>");
